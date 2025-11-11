@@ -1,62 +1,54 @@
-import React from 'react';
-import styled from 'styled-components';
-import { WiCloud, WiDaySunny, WiRain, WiSnow, WiFog, WiThunderstorm } from 'react-icons/wi';
+// src/components/WeatherCard.tsx
+import React from "react";
+import styled from "styled-components";
+import { IconType } from "react-icons";
+import { WiCloud, WiDaySunny, WiRain, WiSnow, WiFog, WiThunderstorm } from "react-icons/wi";
 
-
-const Card = styled.div`
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  padding: 1rem;
-  max-width: 400px;
-  margin: 0 auto;
-  text-align: center;
-  transition: transform 0.2s ease-in-out;
-
-  &:hover {
-    transform: translateY(-4px);
-  }
-
-  @media (max-width: 480px) {
-    width: 90%;
-  }
+const Shell = styled.div`
+  background:#111827; color:#e5e7eb; border-radius:20px; padding:1.5rem;
+  display:grid; grid-template-columns:1fr 1fr; gap:1rem; align-items:center;
+  @media (max-width:600px){ grid-template-columns:1fr; text-align:center; }
 `;
+const Left = styled.div` display:flex; align-items:center; gap:1rem; `;
+const Big = styled.div` font-size:3rem; font-weight:700; line-height:1; `;
+const Sub = styled.div` opacity:.8; `;
 
-
-interface Props {
-  data: any;
-}
-
-const getWeatherIcon = (main: string) => {
-  switch (main) {
-    case 'Clear':
-      return <WiDaySunny size={64} color="#f5b921" />;
-    case 'Clouds':
-      return <WiCloud size={64} color="#888" />;
-    case 'Rain':
-      return <WiRain size={64} color="#0077ff" />;
-    case 'Snow':
-      return <WiSnow size={64} color="#00bfff" />;
-    case 'Thunderstorm':
-      return <WiThunderstorm size={64} color="#222" />;
-    case 'Mist':
-    case 'Fog':
-      return <WiFog size={64} color="#777" />;
-    default:
-      return <WiDaySunny size={64} color="#ccc" />;
-  }
+type WeatherData = {
+  name?: string;
+  weather?: { main?: string; description?: string }[];
+  main?: { temp?: number; humidity?: number };
+  wind?: { speed?: number };
 };
 
+const iconMap: Record<string, IconType> = {
+  Clear: WiDaySunny,
+  Clouds: WiCloud,
+  Rain: WiRain,
+  Snow: WiSnow,
+  Thunderstorm: WiThunderstorm,
+  Mist: WiFog,
+  Fog: WiFog,
+};
 
-const WeatherCard = ({ data }: Props) => {
+export default function WeatherCard({ data }: { data: WeatherData }) {
+  const main = data.weather?.[0]?.main ?? "Clear";
+  const Icon = (iconMap[main] ?? WiDaySunny) as React.ComponentType<{ size: number }>;
+  const desc = data.weather?.[0]?.description ?? "";
+
   return (
-    <Card>
-      <h2>{data.name}</h2>
-    {getWeatherIcon(data.weather[0].main)}
-      <p>{Math.round(data.main.temp)}°C</p>
-      <p>{data.weather[0].description}</p>
-    </Card>
+    <Shell>
+      <Left>
+        <Icon size={64} />
+        <div>
+          <Big>{Math.round(data.main?.temp ?? 0)}°</Big>
+          <Sub style={{ textTransform: "capitalize" }}>{desc}</Sub>
+        </div>
+      </Left>
+      <div style={{ textAlign: "right" }}>
+        <div style={{ fontWeight: 600, fontSize: 20 }}>{data.name}</div>
+        <div>Humidade: {data.main?.humidity ?? 0}%</div>
+        <div>Vento: {Math.round(data.wind?.speed ?? 0)}</div>
+      </div>
+    </Shell>
   );
-};
-
-export default WeatherCard;
+}
