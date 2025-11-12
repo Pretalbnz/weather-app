@@ -8,19 +8,60 @@ import ForecastList from "./components/ForecastList";
 import UnitToggle from "./components/UnitToggle";
 import RecentSearches from "./components/RecentSearches";
 import useWeather from "./hooks/useWeather";
+import TemperatureGraph from "./components/TemperatureGraph";
+
+/* --------- layout --------- */
 
 const Panel = styled.div`
-  position: relative; /* cria contexto para z-index */
+  position: relative;
   background: var(--panel, #0f172a);
   border-radius: 20px;
   padding: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 `;
 
+const Grid = styled.div`
+  display: grid;
+  grid-template-areas:
+    "header  header   header"
+    "sidebar main     forecast"
+    "sidebar graph    graph"; /* <- nova linha só para o gráfico */
+  grid-template-columns: 220px 1fr 320px;
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+
+  /* Tablet: gráfico ocupa a row toda */
+  @media (max-width: 1100px) {
+    grid-template-areas:
+      "header  header"
+      "sidebar main"
+      "forecast forecast"
+      "graph   graph";
+    grid-template-columns: 200px 1fr;
+  }
+
+  /* Mobile: uma coluna */
+  @media (max-width: 800px) {
+    grid-template-areas:
+      "header"
+      "sidebar"
+      "main"
+      "graph"
+      "forecast";
+    grid-template-columns: 1fr;
+  }
+`;
+
+const GraphPanel = styled(Panel)`
+  grid-area: graph;
+`;
+
 const Header = styled(Panel)`
-  grid-column: 1 / -1;
+  grid-area: header;
   overflow: visible;
-  z-index: 5; /* acima dos outros painéis */
+  z-index: 5;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -32,22 +73,21 @@ const Header = styled(Panel)`
   }
 `;
 
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: 220px 1fr 320px;
-  grid-template-rows: auto 1fr;
-  gap: 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem;
-
-  @media (max-width: 1100px) {
-    grid-template-columns: 200px 1fr;
-  }
-  @media (max-width: 800px) {
-    grid-template-columns: 1fr;
-  }
+const Sidebar = styled(Panel)`
+  grid-area: sidebar;
 `;
+
+const Main = styled.div`
+  grid-area: main;
+  display: grid;
+  gap: 1rem;
+`;
+
+const ForecastPanel = styled(Panel)`
+  grid-area: forecast;
+`;
+
+/* --------- visuals --------- */
 
 const SectionTitle = styled.h3`
   margin-bottom: 12px;
@@ -76,11 +116,14 @@ const HLabel = styled.div`
   font-size: 12px;
   letter-spacing: 0.4px;
 `;
+
 const HValue = styled.div`
   font-size: 28px;
   font-weight: 700;
   margin-top: 6px;
 `;
+
+/* --------- component --------- */
 
 export default function App() {
   const {
@@ -110,7 +153,7 @@ export default function App() {
     <>
       <GlobalStyle />
       <Grid>
-        {/* HEADER: SearchBar no topo */}
+        {/* HEADER */}
         <Header>
           <h1 style={{ margin: 0 }}>Weather</h1>
           <div style={{ flex: "0 0 auto" }}>
@@ -122,50 +165,59 @@ export default function App() {
           {error && <ErrorMessage message={error} />}
         </Header>
 
-        {/* SIDEBAR ESQUERDA: pesquisas recentes */}
-        <Panel>
+        {/* SIDEBAR */}
+        <Sidebar>
           <SectionTitle>Pesquisas recentes</SectionTitle>
           <RecentSearches
             items={recent}
             onPick={(city) => fetchByCity(city)}
             onClear={clearRecents}
           />
-        </Panel>
+        </Sidebar>
 
-        {/* CENTRO: cartão + destaques */}
-        <div style={{ display: "grid", gap: "1rem" }}>
+        {/* MAIN */}
+        <Main>
           <Panel>
             {loading && <div>A carregar…</div>}
-            {current && <WeatherCard data={current} />}
+            {current && (
+              <WeatherCard
+                data={current}
+                units={units}
+                cityName={/* city?.name */ undefined}
+              />
+            )}
+
+            <SectionTitle>Today's highlights</SectionTitle>
+            <Highlights>
+              <HighlightCard>
+                <HLabel>Sensação térmica</HLabel>
+                <HValue>{Math.round(current.main?.feels_like ?? 0)}°</HValue>
+              </HighlightCard>
+              <HighlightCard>
+                <HLabel>Humidade</HLabel>
+                <HValue>{current.main?.humidity ?? 0}%</HValue>
+              </HighlightCard>
+              <HighlightCard>
+                <HLabel>Vento</HLabel>
+                <HValue>{windDisplay}</HValue>
+              </HighlightCard>
+              <HighlightCard>
+                <HLabel>Pressão</HLabel>
+                <HValue>{current.main?.pressure ?? 0} mb</HValue>
+              </HighlightCard>
+            </Highlights>
           </Panel>
+        </Main>
 
-          {current && (
-            <Panel>
-              <SectionTitle>Today's highlights</SectionTitle>
-              <Highlights>
-                <HighlightCard>
-                  <HLabel>Sensação térmica</HLabel>
-                  <HValue>{Math.round(current.main?.feels_like ?? 0)}°</HValue>
-                </HighlightCard>
-                <HighlightCard>
-                  <HLabel>Humidade</HLabel>
-                  <HValue>{current.main?.humidity ?? 0}%</HValue>
-                </HighlightCard>
-                <HighlightCard>
-                  <HLabel>Vento</HLabel>
-                  <HValue>{windDisplay}</HValue>
-                </HighlightCard>
-                <HighlightCard>
-                  <HLabel>Pressão</HLabel>
-                  <HValue>{current.main?.pressure ?? 0} mb</HValue>
-                </HighlightCard>
-              </Highlights>
-            </Panel>
-          )}
-        </div>
+        {daily.length > 0 && (
+          <GraphPanel>
+            <SectionTitle>Evolução da temperatura (5 dias)</SectionTitle>
+            <TemperatureGraph days={daily} unitSymbol={symbol} />
+          </GraphPanel>
+        )}
 
-        {/* COLUNA DIREITA: 5-day forecast */}
-        <Panel>
+        {/* FORECAST */}
+        <ForecastPanel>
           <SectionTitle>5-day forecast</SectionTitle>
           {daily.length > 0 ? (
             <ForecastList days={daily} unitSymbol={symbol} />
@@ -174,7 +226,7 @@ export default function App() {
               Sem dados. Procura uma cidade.
             </div>
           )}
-        </Panel>
+        </ForecastPanel>
       </Grid>
     </>
   );

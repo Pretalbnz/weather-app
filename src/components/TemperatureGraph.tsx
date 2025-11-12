@@ -1,54 +1,68 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
 import {
-  LineChart,
+  CartesianGrid,
   Line,
+  LineChart,
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid,
   ResponsiveContainer,
-} from 'recharts';
+  Legend,
+} from "recharts";
 
-const Container = styled.div`
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
-  margin-top: 1.5rem;
-`;
+type Day = { date: string; min: number; max: number };
 
-interface Props {
-  forecast: any;
-}
+export default function TemperatureGraph({
+  days,
+  unitSymbol,
+}: {
+  days: Day[];
+  unitSymbol: "C" | "F";
+}) {
+  // prepara dados para o gráfico
+  const data = (days ?? []).map((d) => ({
+    // label curto: qua, 12/11
+    label: new Date(d.date).toLocaleDateString("pt-PT", {
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+    }),
+    min: d.min,
+    max: d.max,
+  }));
 
-const TemperatureGraph = ({ forecast }: Props) => {
-  if (!forecast?.list) return null;
-
-  // Extrai temperatura média por dia (dados vêm a cada 3h)
-  const dailyData = forecast.list
-    .filter((_: any, index: number) => index % 8 === 0)
-    .map((entry: any) => ({
-      date: new Date(entry.dt * 1000).toLocaleDateString('pt-PT', {
-        weekday: 'short',
-      }),
-      temp: Math.round(entry.main.temp),
-    }));
+  const formatY = (v: number) => `${Math.round(v)}°${unitSymbol}`;
 
   return (
-    <Container>
-      <h3>Evolução da temperatura (5 dias)</h3>
-      <ResponsiveContainer width="100%" height={250}>
-        <LineChart data={dailyData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip />
-          <Line type="monotone" dataKey="temp" stroke="#0077ff" strokeWidth={2} />
+    <div style={{ width: "100%", height: 280 }}>
+      <ResponsiveContainer>
+        <LineChart data={data} margin={{ top: 10, right: 20, bottom: 4, left: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+          <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+          <YAxis tick={{ fontSize: 12 }} tickFormatter={formatY} domain={["dataMin - 2", "dataMax + 2"]} />
+          <Tooltip
+            formatter={(value: number) => [`${Math.round(value)}°${unitSymbol}`, ""]}
+            labelFormatter={(label) => label}
+          />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="max"
+            name={`Máx (°${unitSymbol})`}
+            strokeWidth={3}
+            dot={{ r: 3 }}
+            activeDot={{ r: 5 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="min"
+            name={`Mín (°${unitSymbol})`}
+            strokeWidth={3}
+            dot={{ r: 3 }}
+            strokeDasharray="4 4"
+          />
         </LineChart>
       </ResponsiveContainer>
-    </Container>
+    </div>
   );
-};
-
-export default TemperatureGraph;
+}
