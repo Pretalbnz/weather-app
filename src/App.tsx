@@ -176,38 +176,39 @@ export default function App() {
         </Sidebar>
 
         {/* MAIN */}
-        <Main>
-          <Panel>
-            {loading && <div>A carregar…</div>}
-            {current && (
-              <WeatherCard
-                data={current}
-                units={units}
-                cityName={/* city?.name */ undefined}
-              />
-            )}
+<Main>
+  <Panel>
+    {loading && <div>A carregar…</div>}
+    {current && (
+      <WeatherCard data={current} units={units} cityName={undefined} />
+    )}
 
-            <SectionTitle>Today's highlights</SectionTitle>
-            <Highlights>
-              <HighlightCard>
-                <HLabel>Sensação térmica</HLabel>
-                <HValue>{Math.round(current.main?.feels_like ?? 0)}°</HValue>
-              </HighlightCard>
-              <HighlightCard>
-                <HLabel>Humidade</HLabel>
-                <HValue>{current.main?.humidity ?? 0}%</HValue>
-              </HighlightCard>
-              <HighlightCard>
-                <HLabel>Vento</HLabel>
-                <HValue>{windDisplay}</HValue>
-              </HighlightCard>
-              <HighlightCard>
-                <HLabel>Pressão</HLabel>
-                <HValue>{current.main?.pressure ?? 0} mb</HValue>
-              </HighlightCard>
-            </Highlights>
-          </Panel>
-        </Main>
+    {current && (
+      <>
+        <SectionTitle>Today's highlights</SectionTitle>
+        <Highlights>
+          <HighlightCard>
+            <HLabel>Sensação térmica</HLabel>
+            <HValue>{Math.round(current?.main?.feels_like ?? 0)}° {units === "metric" ? "C" : "F"}</HValue>
+          </HighlightCard>
+          <HighlightCard>
+            <HLabel>Humidade</HLabel>
+            <HValue>{current?.main?.humidity ?? 0}%</HValue>
+          </HighlightCard>
+          <HighlightCard>
+            <HLabel>Vento</HLabel>
+            <HValue>{windDisplay}</HValue>
+          </HighlightCard>
+          <HighlightCard>
+            <HLabel>Pressão</HLabel>
+            <HValue>{current?.main?.pressure ?? 0} mb</HValue>
+          </HighlightCard>
+        </Highlights>
+      </>
+    )}
+  </Panel>
+</Main>
+
 
         {daily.length > 0 && (
           <GraphPanel>
