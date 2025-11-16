@@ -9,11 +9,17 @@ import UnitToggle from "./components/UnitToggle";
 import RecentSearches from "./components/RecentSearches";
 import useWeather from "./hooks/useWeather";
 import TemperatureGraph from "./components/TemperatureGraph";
-import TemperatureMap from "./components/TemperatureMap";   
+import TemperatureMap from "./components/TemperatureMap";
 import GraphMapCarousel from "./components/GraphMapCarousel";
 import GraphMapPanel from "./components/GraphMapPanel";
 
 /* --------- layout --------- */
+
+const EmptyWrap = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+`;
 
 const Panel = styled.div`
   position: relative;
@@ -21,6 +27,13 @@ const Panel = styled.div`
   border-radius: 20px;
   padding: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+`;
+
+const EmptyPanel = styled(Panel)`
+  margin-top: 1rem;
+  text-align: center;
+  padding: 48px 24px;
+  color: #94a3b8;
 `;
 
 const Grid = styled.div`
@@ -150,6 +163,36 @@ export default function App() {
     localStorage.removeItem("recent_cities_v1");
     window.location.reload();
   };
+
+  if (!current && !loading) {
+    return (
+      <>
+        <GlobalStyle />
+        <EmptyWrap>
+          <Header>
+            <h1 style={{ margin: 0 }}>Weather</h1>
+            <div style={{ flex: "0 0 auto" }}>
+              <UnitToggle units={units} onChange={setUnits} />
+            </div>
+            <div className="grow">
+              <SearchBar onSearch={fetchByCity} />
+            </div>
+            {error && <ErrorMessage message={error} />}
+          </Header>
+
+          <EmptyPanel>
+            <h3 style={{ margin: "0", color: "#e5e7eb" }}>
+              Seleciona uma cidade
+            </h3>
+            <p style={{ marginTop: 8 }}>
+              Escreve o nome na barra de pesquisa e escolhe um resultado para
+              ver a meteorologia e a previsão dos próximos dias.
+            </p>
+          </EmptyPanel>
+        </EmptyWrap>
+      </>
+    );
+  }
 
   return (
     <>
