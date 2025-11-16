@@ -9,6 +9,9 @@ import UnitToggle from "./components/UnitToggle";
 import RecentSearches from "./components/RecentSearches";
 import useWeather from "./hooks/useWeather";
 import TemperatureGraph from "./components/TemperatureGraph";
+import TemperatureMap from "./components/TemperatureMap";   
+import GraphMapCarousel from "./components/GraphMapCarousel";
+import GraphMapPanel from "./components/GraphMapPanel";
 
 /* --------- layout --------- */
 
@@ -25,14 +28,13 @@ const Grid = styled.div`
   grid-template-areas:
     "header  header   header"
     "sidebar main     forecast"
-    "sidebar graph    graph"; /* <- nova linha só para o gráfico */
+    "sidebar graph    graph";
   grid-template-columns: 220px 1fr 320px;
   gap: 1rem;
   max-width: 1200px;
   margin: 0 auto;
   padding: 1.5rem;
 
-  /* Tablet: gráfico ocupa a row toda */
   @media (max-width: 1100px) {
     grid-template-areas:
       "header  header"
@@ -42,7 +44,6 @@ const Grid = styled.div`
     grid-template-columns: 200px 1fr;
   }
 
-  /* Mobile: uma coluna */
   @media (max-width: 800px) {
     grid-template-areas:
       "header"
@@ -57,7 +58,6 @@ const Grid = styled.div`
 const GraphPanel = styled(Panel)`
   grid-area: graph;
 `;
-
 const Header = styled(Panel)`
   grid-area: header;
   overflow: visible;
@@ -72,17 +72,14 @@ const Header = styled(Panel)`
     min-width: 260px;
   }
 `;
-
 const Sidebar = styled(Panel)`
   grid-area: sidebar;
 `;
-
 const Main = styled.div`
   grid-area: main;
   display: grid;
   gap: 1rem;
 `;
-
 const ForecastPanel = styled(Panel)`
   grid-area: forecast;
 `;
@@ -116,7 +113,6 @@ const HLabel = styled.div`
   font-size: 12px;
   letter-spacing: 0.4px;
 `;
-
 const HValue = styled.div`
   font-size: 28px;
   font-weight: 700;
@@ -138,6 +134,12 @@ export default function App() {
   } = useWeather();
 
   const symbol = units === "metric" ? "C" : "F";
+
+  // agora aqui dentro:
+  const lat = current?.coord?.lat;
+  const lon = current?.coord?.lon;
+  const owmKey = process.env.REACT_APP_WEATHER_API_KEY as string; // usa o nome do teu .env
+
   const windMs = current?.wind?.speed ?? 0;
   const windDisplay =
     units === "metric"
@@ -176,44 +178,51 @@ export default function App() {
         </Sidebar>
 
         {/* MAIN */}
-<Main>
-  <Panel>
-    {loading && <div>A carregar…</div>}
-    {current && (
-      <WeatherCard data={current} units={units} cityName={undefined} />
-    )}
+        <Main>
+          <Panel>
+            {loading && <div>A carregar…</div>}
+            {current && (
+              <WeatherCard data={current} units={units} cityName={undefined} />
+            )}
 
-    {current && (
-      <>
-        <SectionTitle>Today's highlights</SectionTitle>
-        <Highlights>
-          <HighlightCard>
-            <HLabel>Sensação térmica</HLabel>
-            <HValue>{Math.round(current?.main?.feels_like ?? 0)}° {units === "metric" ? "C" : "F"}</HValue>
-          </HighlightCard>
-          <HighlightCard>
-            <HLabel>Humidade</HLabel>
-            <HValue>{current?.main?.humidity ?? 0}%</HValue>
-          </HighlightCard>
-          <HighlightCard>
-            <HLabel>Vento</HLabel>
-            <HValue>{windDisplay}</HValue>
-          </HighlightCard>
-          <HighlightCard>
-            <HLabel>Pressão</HLabel>
-            <HValue>{current?.main?.pressure ?? 0} mb</HValue>
-          </HighlightCard>
-        </Highlights>
-      </>
-    )}
-  </Panel>
-</Main>
-
+            {current && (
+              <>
+                <SectionTitle>Today's highlights</SectionTitle>
+                <Highlights>
+                  <HighlightCard>
+                    <HLabel>Sensação térmica</HLabel>
+                    <HValue>
+                      {Math.round(current?.main?.feels_like ?? 0)}° {symbol}
+                    </HValue>
+                  </HighlightCard>
+                  <HighlightCard>
+                    <HLabel>Humidade</HLabel>
+                    <HValue>{current?.main?.humidity ?? 0}%</HValue>
+                  </HighlightCard>
+                  <HighlightCard>
+                    <HLabel>Vento</HLabel>
+                    <HValue>{windDisplay}</HValue>
+                  </HighlightCard>
+                  <HighlightCard>
+                    <HLabel>Pressão</HLabel>
+                    <HValue>{current?.main?.pressure ?? 0} mb</HValue>
+                  </HighlightCard>
+                </Highlights>
+              </>
+            )}
+          </Panel>
+        </Main>
 
         {daily.length > 0 && (
           <GraphPanel>
-            <SectionTitle>Evolução da temperatura (5 dias)</SectionTitle>
-            <TemperatureGraph days={daily} unitSymbol={symbol} />
+            <GraphMapPanel
+              days={daily}
+              unitSymbol={symbol}
+              lat={lat}
+              lon={lon}
+              city={current?.name}
+              owmKey={owmKey}
+            />
           </GraphPanel>
         )}
 
