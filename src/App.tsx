@@ -12,6 +12,7 @@ import TemperatureGraph from "./components/TemperatureGraph";
 import TemperatureMap from "./components/TemperatureMap";
 import GraphMapCarousel from "./components/GraphMapCarousel";
 import GraphMapPanel from "./components/GraphMapPanel";
+import Footer from "./components/Footer";
 
 /* --------- layout --------- */
 
@@ -190,6 +191,11 @@ export default function App() {
             </p>
           </EmptyPanel>
         </EmptyWrap>
+        <Footer
+        githubUrl="https://github.com/Pretalbnz/weather-app"
+        linkedinUrl="https://www.linkedin.com/in/ruben-gomes-1540a82b7/"
+        email="ruben.marques.gomes@gmail.com"
+      />
       </>
     );
   }
@@ -230,7 +236,7 @@ export default function App() {
 
             {current && (
               <>
-                <SectionTitle>Today's highlights</SectionTitle>
+                <SectionTitle>Destaques de Hoje</SectionTitle>
                 <Highlights>
                   <HighlightCard>
                     <HLabel>Sensação térmica</HLabel>
@@ -271,7 +277,7 @@ export default function App() {
 
         {/* FORECAST */}
         <ForecastPanel>
-          <SectionTitle>5-day forecast</SectionTitle>
+          <SectionTitle>Previsão de 5 dias</SectionTitle>
           {daily.length > 0 ? (
             <ForecastList days={daily} unitSymbol={symbol} />
           ) : (
@@ -281,6 +287,12 @@ export default function App() {
           )}
         </ForecastPanel>
       </Grid>
+
+      <Footer
+        githubUrl="https://github.com/Pretalbnz/weather-app"
+        linkedinUrl="https://www.linkedin.com/in/ruben-gomes-1540a82b7/"
+        email="ruben.marques.gomes@gmail.com"
+      />
     </>
   );
 }
