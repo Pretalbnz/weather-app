@@ -23,10 +23,6 @@ Aplicação web (React + TypeScript) para consultar o tempo atual e a previsão 
 - OpenWeatherMap API (dados + tiles)  
 - Vercel (deploy)
 
-## 🚀 Demo
-
-Produção: **[ADICIONA_AQUI_A_URL_DA_VERCEL]**
-
 ## 📦 Instalação
 
 ```bash
