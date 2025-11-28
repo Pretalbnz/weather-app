@@ -27,8 +27,8 @@ Aplicação web (React + TypeScript) para consultar o tempo atual e a previsão 
 
 ```bash
 # 1) Clonar
-git clone https://github.com/<teu-user>/<teu-repo>.git
-cd <teu-repo>
+git clone https://github.com/Pretalbnz/weather-app.git
+cd weather-app
 
 # 2) Dependências
 npm install
